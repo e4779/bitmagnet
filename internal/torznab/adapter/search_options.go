@@ -129,8 +129,13 @@ func searchRequestToQueryOptions(r torznab.SearchRequest) ([]query.Option, error
 				search.TorrentContentTypeCriteria(model.ContentTypeSoftware, model.ContentTypeGame))
 		case torznab.CategoryAudioAudiobook.Has(cat):
 			catCriteria = append(catCriteria, search.TorrentContentTypeCriteria(model.ContentTypeAudiobook))
-		case torznab.CategoryAudioMP3.Has(cat), torznab.CategoryAudioLossless.Has(cat):
-			catCriteria = append(catCriteria, search.TorrentContentTypeCriteria(model.ContentTypeMusic))
+		case torznab.CategoryAudioMP3.Has(cat):
+			// cat=3010 (Audio/MP3) → lossy codecs only. Combined with the
+			// FunctionMusic guard above, this filters to music + lossy.
+			catCriteria = append(catCriteria, search.AudioCodecCriteria(model.AudioCodecLossy))
+		case torznab.CategoryAudioLossless.Has(cat):
+			// cat=3040 (Audio/Lossless) → lossless codecs only.
+			catCriteria = append(catCriteria, search.AudioCodecCriteria(model.AudioCodecLossless))
 		case torznab.CategoryAudio.Has(cat):
 			catCriteria = append(catCriteria, search.TorrentContentTypeCriteria(model.ContentTypeMusic))
 		case torznab.CategoryBooksComics.Has(cat):

@@ -91,6 +91,10 @@ func (tc *TorrentContent) UpdateTsv() {
 		tsv.AddText(tc.VideoModifier.VideoModifier.String(), fts.TsvectorWeightC)
 	}
 
+	if tc.AudioCodec.Valid {
+		tsv.AddText(tc.AudioCodec.AudioCodec.String(), fts.TsvectorWeightC)
+	}
+
 	if tc.ReleaseGroup.Valid {
 		tsv.AddText(tc.ReleaseGroup.String, fts.TsvectorWeightC)
 	}

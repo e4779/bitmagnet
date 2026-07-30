@@ -211,6 +211,7 @@ func newTorrentContent(t model.Torrent, c classification.Result) model.TorrentCo
 		VideoCodec:      c.VideoCodec,
 		Video3D:         c.Video3D,
 		VideoModifier:   c.VideoModifier,
+		AudioCodec:      c.AudioCodec,
 		ReleaseGroup:    c.ReleaseGroup,
 		Size:            t.Size,
 		FilesCount:      filesCount,

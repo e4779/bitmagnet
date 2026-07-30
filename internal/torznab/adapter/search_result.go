@@ -44,10 +44,14 @@ func torrentContentResultItemToTorznabResultItem(item search.TorrentContentResul
 		case model.ContentTypeTvShow:
 			categoryID = torznab.CategoryTV.ID
 		case model.ContentTypeMusic:
-			switch item.Torrent.Extension.String {
-			case "flac", "ape", "wav", "dsf":
+			// Subdivide by AudioCodec (computed by the classifier from file
+			// extensions — see InferAudioCodecFromFiles). For multi-file albums
+			// (99% of music), this gives the dominant format; falls back to
+			// the parent Audio (3000) category when audio_codec is unset.
+			switch item.AudioCodec.AudioCodec {
+			case model.AudioCodecLossless:
 				categoryID = torznab.CategoryAudioLossless.ID
-			case "mp3", "aac", "ogg", "m4a":
+			case model.AudioCodecLossy:
 				categoryID = torznab.CategoryAudioMP3.ID
 			default:
 				categoryID = torznab.CategoryAudio.ID
