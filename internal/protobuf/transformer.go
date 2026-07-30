@@ -144,6 +144,13 @@ func NewClassification(c classification.Result) *Classification {
 		videoCodec = &str
 	}
 
+	var audioCodec *string
+
+	if c.AudioCodec.Valid {
+		str := c.AudioCodec.AudioCodec.String()
+		audioCodec = &str
+	}
+
 	var releaseGroup *string
 	if c.ReleaseGroup.Valid {
 		releaseGroup = &c.ReleaseGroup.String
@@ -168,6 +175,7 @@ func NewClassification(c classification.Result) *Classification {
 		VideoResolution: videoResolution,
 		VideoSource:     videoSource,
 		VideoCodec:      videoCodec,
+		AudioCodec:      audioCodec,
 		ReleaseGroup:    releaseGroup,
 		ContentId:       contentID,
 		ContentSource:   contentSource,
