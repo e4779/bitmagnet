@@ -129,6 +129,8 @@ func searchRequestToQueryOptions(r torznab.SearchRequest) ([]query.Option, error
 				search.TorrentContentTypeCriteria(model.ContentTypeSoftware, model.ContentTypeGame))
 		case torznab.CategoryAudioAudiobook.Has(cat):
 			catCriteria = append(catCriteria, search.TorrentContentTypeCriteria(model.ContentTypeAudiobook))
+		case torznab.CategoryAudioMP3.Has(cat), torznab.CategoryAudioLossless.Has(cat):
+			catCriteria = append(catCriteria, search.TorrentContentTypeCriteria(model.ContentTypeMusic))
 		case torznab.CategoryAudio.Has(cat):
 			catCriteria = append(catCriteria, search.TorrentContentTypeCriteria(model.ContentTypeMusic))
 		case torznab.CategoryBooksComics.Has(cat):

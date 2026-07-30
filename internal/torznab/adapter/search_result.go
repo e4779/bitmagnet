@@ -44,7 +44,14 @@ func torrentContentResultItemToTorznabResultItem(item search.TorrentContentResul
 		case model.ContentTypeTvShow:
 			categoryID = torznab.CategoryTV.ID
 		case model.ContentTypeMusic:
-			categoryID = torznab.CategoryAudio.ID
+			switch item.Torrent.Extension.String {
+			case "flac", "ape", "wav", "dsf":
+				categoryID = torznab.CategoryAudioLossless.ID
+			case "mp3", "aac", "ogg", "m4a":
+				categoryID = torznab.CategoryAudioMP3.ID
+			default:
+				categoryID = torznab.CategoryAudio.ID
+			}
 		case model.ContentTypeEbook:
 			categoryID = torznab.CategoryBooks.ID
 		case model.ContentTypeComic:
