@@ -48,10 +48,28 @@ var categoriesMap = map[int]Category{
 		Name: "Audio",
 		Subcat: []Subcategory{
 			{
+				ID:   3010,
+				Name: "Audio/MP3",
+			},
+			{
+				ID:   3040,
+				Name: "Audio/Lossless",
+			},
+			{
 				ID:   3030,
 				Name: "Audio/Audiobook",
 			},
 		},
+	},
+	3010: {
+		ID:     3010,
+		Name:   "Audio/MP3",
+		Subcat: []Subcategory{},
+	},
+	3040: {
+		ID:     3040,
+		Name:   "Audio/Lossless",
+		Subcat: []Subcategory{},
 	},
 	3030: {
 		ID:     3030,
@@ -159,6 +177,8 @@ var (
 	CategoryMoviesUHD      = categoriesMap[2045]
 	CategoryMovies3D       = categoriesMap[2060]
 	CategoryAudio          = categoriesMap[3000]
+	CategoryAudioMP3       = categoriesMap[3010]
+	CategoryAudioLossless  = categoriesMap[3040]
 	CategoryAudioAudiobook = categoriesMap[3030]
 	CategoryPC             = categoriesMap[4000]
 	CategoryPCGames        = categoriesMap[4050]
