@@ -31,6 +31,7 @@ type TorrentContent struct {
 	VideoCodec      model.NullVideoCodec
 	Video3D         model.NullVideo3D
 	VideoModifier   model.NullVideoModifier
+	AudioCodec      model.NullAudioCodec
 	ReleaseGroup    model.NullString
 	SearchString    string
 	Seeders         model.NullUint
@@ -60,6 +61,7 @@ func NewTorrentContentFromResultItem(item search.TorrentContentResultItem) Torre
 		VideoCodec:      item.VideoCodec,
 		Video3D:         item.Video3D,
 		VideoModifier:   item.VideoModifier,
+		AudioCodec:      item.AudioCodec,
 		ReleaseGroup:    item.ReleaseGroup,
 		Seeders:         item.Seeders,
 		Leechers:        item.Leechers,
@@ -215,6 +217,10 @@ func torrentContentFacetsOption(input gen.TorrentContentFacetsInput) q.Option {
 		qFacets = append(qFacets, videoSourceFacet(*videoSource))
 	}
 
+	if audioCodec, ok := input.AudioCodec.ValueOK(); ok {
+		qFacets = append(qFacets, audioCodecFacet(*audioCodec))
+	}
+
 	return q.WithFacet(qFacets...)
 }
 
@@ -287,6 +293,11 @@ func transformTorrentContentAggregations(aggs q.Aggregations) (gen.TorrentConten
 	}
 
 	result.VideoSource, err = videoSourceAggs(aggs[search.VideoSourceFacetKey].Items)
+	if err != nil {
+		return result, err
+	}
+
+	result.AudioCodec, err = audioCodecAggs(aggs[search.AudioCodecFacetKey].Items)
 	if err != nil {
 		return result, err
 	}

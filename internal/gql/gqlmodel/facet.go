@@ -173,6 +173,10 @@ func videoSourceFacet(input gen.VideoSourceFacetInput) q.Facet {
 	return facet(input.Aggregate, graphql.Omittable[*model.FacetLogic]{}, input.Filter, search.VideoSourceFacet)
 }
 
+func audioCodecFacet(input gen.AudioCodecFacetInput) q.Facet {
+	return facet(input.Aggregate, graphql.Omittable[*model.FacetLogic]{}, input.Filter, search.AudioCodecFacet)
+}
+
 func queueJobQueueFacet(input gen.QueueJobQueueFacetInput) q.Facet {
 	var filter graphql.Omittable[[]*string]
 
@@ -324,6 +328,13 @@ func videoSourceAggs(items q.AggregationItems) ([]gen.VideoSourceAgg, error) {
 	return aggs(items, model.ParseVideoSource,
 		func(value *model.VideoSource, label string, count uint, isEstimate bool) gen.VideoSourceAgg {
 			return gen.VideoSourceAgg{Value: value, Label: label, Count: int(count), IsEstimate: isEstimate}
+		})
+}
+
+func audioCodecAggs(items q.AggregationItems) ([]gen.AudioCodecAgg, error) {
+	return aggs(items, model.ParseAudioCodec,
+		func(value *model.AudioCodec, label string, count uint, isEstimate bool) gen.AudioCodecAgg {
+			return gen.AudioCodecAgg{Value: value, Label: label, Count: int(count), IsEstimate: isEstimate}
 		})
 }
 

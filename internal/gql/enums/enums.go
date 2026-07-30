@@ -24,6 +24,7 @@ var Enums = []enum{
 	newEnum("FilesStatus", model.FilesStatusNames()),
 	newEnum("Language", model.LanguageValueStrings()),
 	newEnum("Video3D", model.Video3DNames()),
+	newEnum("AudioCodec", model.AudioCodecNames()),
 	newEnum("VideoCodec", model.VideoCodecNames()),
 	newEnum("VideoModifier", model.VideoModifierNames()),
 	newEnum("VideoResolution", model.VideoResolutionNames()),

@@ -62,6 +62,13 @@ type DirectiveRoot struct {
 }
 
 type ComplexityRoot struct {
+	AudioCodecAgg struct {
+		Count      func(childComplexity int) int
+		IsEstimate func(childComplexity int) int
+		Label      func(childComplexity int) int
+		Value      func(childComplexity int) int
+	}
+
 	Content struct {
 		Adult            func(childComplexity int) int
 		Attributes       func(childComplexity int) int
@@ -271,6 +278,7 @@ type ComplexityRoot struct {
 	}
 
 	TorrentContent struct {
+		AudioCodec      func(childComplexity int) int
 		Content         func(childComplexity int) int
 		ContentID       func(childComplexity int) int
 		ContentSource   func(childComplexity int) int
@@ -295,6 +303,7 @@ type ComplexityRoot struct {
 	}
 
 	TorrentContentAggregations struct {
+		AudioCodec      func(childComplexity int) int
 		ContentType     func(childComplexity int) int
 		Genre           func(childComplexity int) int
 		Language        func(childComplexity int) int
@@ -488,6 +497,34 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 	ec := executionContext{nil, e, 0, 0, nil}
 	_ = ec
 	switch typeName + "." + field {
+
+	case "AudioCodecAgg.count":
+		if e.complexity.AudioCodecAgg.Count == nil {
+			break
+		}
+
+		return e.complexity.AudioCodecAgg.Count(childComplexity), true
+
+	case "AudioCodecAgg.isEstimate":
+		if e.complexity.AudioCodecAgg.IsEstimate == nil {
+			break
+		}
+
+		return e.complexity.AudioCodecAgg.IsEstimate(childComplexity), true
+
+	case "AudioCodecAgg.label":
+		if e.complexity.AudioCodecAgg.Label == nil {
+			break
+		}
+
+		return e.complexity.AudioCodecAgg.Label(childComplexity), true
+
+	case "AudioCodecAgg.value":
+		if e.complexity.AudioCodecAgg.Value == nil {
+			break
+		}
+
+		return e.complexity.AudioCodecAgg.Value(childComplexity), true
 
 	case "Content.adult":
 		if e.complexity.Content.Adult == nil {
@@ -1398,6 +1435,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 
 		return e.complexity.Torrent.UpdatedAt(childComplexity), true
 
+	case "TorrentContent.audioCodec":
+		if e.complexity.TorrentContent.AudioCodec == nil {
+			break
+		}
+
+		return e.complexity.TorrentContent.AudioCodec(childComplexity), true
+
 	case "TorrentContent.content":
 		if e.complexity.TorrentContent.Content == nil {
 			break
@@ -1544,6 +1588,13 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 		}
 
 		return e.complexity.TorrentContent.VideoSource(childComplexity), true
+
+	case "TorrentContentAggregations.audioCodec":
+		if e.complexity.TorrentContentAggregations.AudioCodec == nil {
+			break
+		}
+
+		return e.complexity.TorrentContentAggregations.AudioCodec(childComplexity), true
 
 	case "TorrentContentAggregations.contentType":
 		if e.complexity.TorrentContentAggregations.ContentType == nil {
@@ -2109,6 +2160,7 @@ func (e *executableSchema) Exec(ctx context.Context) graphql.ResponseHandler {
 	opCtx := graphql.GetOperationContext(ctx)
 	ec := executionContext{opCtx, e, 0, 0, make(chan graphql.DeferredResult)}
 	inputUnmarshalMap := graphql.BuildUnmarshalerMap(
+		ec.unmarshalInputAudioCodecFacetInput,
 		ec.unmarshalInputContentTypeFacetInput,
 		ec.unmarshalInputGenreFacetInput,
 		ec.unmarshalInputLanguageFacetInput,
@@ -2337,6 +2389,12 @@ enum Video3D {
   V3DOU
 }
 
+enum AudioCodec {
+  Lossless
+  Lossy
+  Other
+}
+
 enum VideoCodec {
   H264
   x264
@@ -2510,6 +2568,7 @@ type TorrentContent {
   videoCodec: VideoCodec
   video3d: Video3D
   videoModifier: VideoModifier
+  audioCodec: AudioCodec
   releaseGroup: String
   seeders: Int
   leechers: Int
@@ -2855,6 +2914,11 @@ input VideoSourceFacetInput {
   filter: [VideoSource]
 }
 
+input AudioCodecFacetInput {
+  aggregate: Boolean
+  filter: [AudioCodec]
+}
+
 input TorrentContentFacetsInput {
   contentType: ContentTypeFacetInput
   torrentSource: TorrentSourceFacetInput
@@ -2865,6 +2929,7 @@ input TorrentContentFacetsInput {
   releaseYear: ReleaseYearFacetInput
   videoResolution: VideoResolutionFacetInput
   videoSource: VideoSourceFacetInput
+  audioCodec: AudioCodecFacetInput
 }
 
 type ContentTypeAgg {
@@ -2930,6 +2995,13 @@ type VideoSourceAgg {
   isEstimate: Boolean!
 }
 
+type AudioCodecAgg {
+  value: AudioCodec
+  label: String!
+  count: Int!
+  isEstimate: Boolean!
+}
+
 type TorrentContentAggregations {
   contentType: [ContentTypeAgg!]
   torrentSource: [TorrentSourceAgg!]
@@ -2940,6 +3012,7 @@ type TorrentContentAggregations {
   releaseYear: [ReleaseYearAgg!]
   videoResolution: [VideoResolutionAgg!]
   videoSource: [VideoSourceAgg!]
+  audioCodec: [AudioCodecAgg!]
 }
 
 type TorrentContentSearchResult {
@@ -3567,6 +3640,179 @@ func (ec *executionContext) field___Type_fields_argsIncludeDeprecated(
 // endregion ************************** directives.gotpl **************************
 
 // region    **************************** field.gotpl *****************************
+
+func (ec *executionContext) _AudioCodecAgg_value(ctx context.Context, field graphql.CollectedField, obj *gen.AudioCodecAgg) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AudioCodecAgg_value(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Value, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(*model.AudioCodec)
+	fc.Result = res
+	return ec.marshalOAudioCodec2ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AudioCodecAgg_value(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AudioCodecAgg",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AudioCodec does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AudioCodecAgg_label(ctx context.Context, field graphql.CollectedField, obj *gen.AudioCodecAgg) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AudioCodecAgg_label(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Label, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(string)
+	fc.Result = res
+	return ec.marshalNString2string(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AudioCodecAgg_label(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AudioCodecAgg",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type String does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AudioCodecAgg_count(ctx context.Context, field graphql.CollectedField, obj *gen.AudioCodecAgg) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AudioCodecAgg_count(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.Count, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(int)
+	fc.Result = res
+	return ec.marshalNInt2int(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AudioCodecAgg_count(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AudioCodecAgg",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Int does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
+func (ec *executionContext) _AudioCodecAgg_isEstimate(ctx context.Context, field graphql.CollectedField, obj *gen.AudioCodecAgg) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_AudioCodecAgg_isEstimate(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.IsEstimate, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		if !graphql.HasFieldError(ctx, fc) {
+			ec.Errorf(ctx, "must not be null")
+		}
+		return graphql.Null
+	}
+	res := resTmp.(bool)
+	fc.Result = res
+	return ec.marshalNBoolean2bool(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_AudioCodecAgg_isEstimate(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "AudioCodecAgg",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type Boolean does not have child fields")
+		},
+	}
+	return fc, nil
+}
 
 func (ec *executionContext) _Content_type(ctx context.Context, field graphql.CollectedField, obj *model.Content) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_Content_type(ctx, field)
@@ -10191,6 +10437,47 @@ func (ec *executionContext) fieldContext_TorrentContent_videoModifier(_ context.
 	return fc, nil
 }
 
+func (ec *executionContext) _TorrentContent_audioCodec(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TorrentContent) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentContent_audioCodec(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AudioCodec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.(model.NullAudioCodec)
+	fc.Result = res
+	return ec.marshalOAudioCodec2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐNullAudioCodec(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentContent_audioCodec(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentContent",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			return nil, errors.New("field of type AudioCodec does not have child fields")
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TorrentContent_releaseGroup(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TorrentContent) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TorrentContent_releaseGroup(ctx, field)
 	if err != nil {
@@ -10905,6 +11192,57 @@ func (ec *executionContext) fieldContext_TorrentContentAggregations_videoSource(
 	return fc, nil
 }
 
+func (ec *executionContext) _TorrentContentAggregations_audioCodec(ctx context.Context, field graphql.CollectedField, obj *gen.TorrentContentAggregations) (ret graphql.Marshaler) {
+	fc, err := ec.fieldContext_TorrentContentAggregations_audioCodec(ctx, field)
+	if err != nil {
+		return graphql.Null
+	}
+	ctx = graphql.WithFieldContext(ctx, fc)
+	defer func() {
+		if r := recover(); r != nil {
+			ec.Error(ctx, ec.Recover(ctx, r))
+			ret = graphql.Null
+		}
+	}()
+	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (any, error) {
+		ctx = rctx // use context from middleware stack in children
+		return obj.AudioCodec, nil
+	})
+	if err != nil {
+		ec.Error(ctx, err)
+		return graphql.Null
+	}
+	if resTmp == nil {
+		return graphql.Null
+	}
+	res := resTmp.([]gen.AudioCodecAgg)
+	fc.Result = res
+	return ec.marshalOAudioCodecAgg2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐAudioCodecAggᚄ(ctx, field.Selections, res)
+}
+
+func (ec *executionContext) fieldContext_TorrentContentAggregations_audioCodec(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "TorrentContentAggregations",
+		Field:      field,
+		IsMethod:   false,
+		IsResolver: false,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "value":
+				return ec.fieldContext_AudioCodecAgg_value(ctx, field)
+			case "label":
+				return ec.fieldContext_AudioCodecAgg_label(ctx, field)
+			case "count":
+				return ec.fieldContext_AudioCodecAgg_count(ctx, field)
+			case "isEstimate":
+				return ec.fieldContext_AudioCodecAgg_isEstimate(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type AudioCodecAgg", field.Name)
+		},
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _TorrentContentQuery_search(ctx context.Context, field graphql.CollectedField, obj *gqlmodel.TorrentContentQuery) (ret graphql.Marshaler) {
 	fc, err := ec.fieldContext_TorrentContentQuery_search(ctx, field)
 	if err != nil {
@@ -11170,6 +11508,8 @@ func (ec *executionContext) fieldContext_TorrentContentSearchResult_items(_ cont
 				return ec.fieldContext_TorrentContent_video3d(ctx, field)
 			case "videoModifier":
 				return ec.fieldContext_TorrentContent_videoModifier(ctx, field)
+			case "audioCodec":
+				return ec.fieldContext_TorrentContent_audioCodec(ctx, field)
 			case "releaseGroup":
 				return ec.fieldContext_TorrentContent_releaseGroup(ctx, field)
 			case "seeders":
@@ -11246,6 +11586,8 @@ func (ec *executionContext) fieldContext_TorrentContentSearchResult_aggregations
 				return ec.fieldContext_TorrentContentAggregations_videoResolution(ctx, field)
 			case "videoSource":
 				return ec.fieldContext_TorrentContentAggregations_videoSource(ctx, field)
+			case "audioCodec":
+				return ec.fieldContext_TorrentContentAggregations_audioCodec(ctx, field)
 			}
 			return nil, fmt.Errorf("no field named %q was found under type TorrentContentAggregations", field.Name)
 		},
@@ -15875,6 +16217,40 @@ func (ec *executionContext) fieldContext___Type_isOneOf(_ context.Context, field
 
 // region    **************************** input.gotpl *****************************
 
+func (ec *executionContext) unmarshalInputAudioCodecFacetInput(ctx context.Context, obj any) (gen.AudioCodecFacetInput, error) {
+	var it gen.AudioCodecFacetInput
+	asMap := map[string]any{}
+	for k, v := range obj.(map[string]any) {
+		asMap[k] = v
+	}
+
+	fieldsInOrder := [...]string{"aggregate", "filter"}
+	for _, k := range fieldsInOrder {
+		v, ok := asMap[k]
+		if !ok {
+			continue
+		}
+		switch k {
+		case "aggregate":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("aggregate"))
+			data, err := ec.unmarshalOBoolean2ᚖbool(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Aggregate = graphql.OmittableOf(data)
+		case "filter":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("filter"))
+			data, err := ec.unmarshalOAudioCodec2ᚕᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.Filter = graphql.OmittableOf(data)
+		}
+	}
+
+	return it, nil
+}
+
 func (ec *executionContext) unmarshalInputContentTypeFacetInput(ctx context.Context, obj any) (gen.ContentTypeFacetInput, error) {
 	var it gen.ContentTypeFacetInput
 	asMap := map[string]any{}
@@ -16452,7 +16828,7 @@ func (ec *executionContext) unmarshalInputTorrentContentFacetsInput(ctx context.
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"contentType", "torrentSource", "torrentTag", "torrentFileType", "language", "genre", "releaseYear", "videoResolution", "videoSource"}
+	fieldsInOrder := [...]string{"contentType", "torrentSource", "torrentTag", "torrentFileType", "language", "genre", "releaseYear", "videoResolution", "videoSource", "audioCodec"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -16522,6 +16898,13 @@ func (ec *executionContext) unmarshalInputTorrentContentFacetsInput(ctx context.
 				return it, err
 			}
 			it.VideoSource = graphql.OmittableOf(data)
+		case "audioCodec":
+			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("audioCodec"))
+			data, err := ec.unmarshalOAudioCodecFacetInput2ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐAudioCodecFacetInput(ctx, v)
+			if err != nil {
+				return it, err
+			}
+			it.AudioCodec = graphql.OmittableOf(data)
 		}
 	}
 
@@ -17070,6 +17453,57 @@ func (ec *executionContext) unmarshalInputVideoSourceFacetInput(ctx context.Cont
 // endregion ************************** interface.gotpl ***************************
 
 // region    **************************** object.gotpl ****************************
+
+var audioCodecAggImplementors = []string{"AudioCodecAgg"}
+
+func (ec *executionContext) _AudioCodecAgg(ctx context.Context, sel ast.SelectionSet, obj *gen.AudioCodecAgg) graphql.Marshaler {
+	fields := graphql.CollectFields(ec.OperationContext, sel, audioCodecAggImplementors)
+
+	out := graphql.NewFieldSet(fields)
+	deferred := make(map[string]*graphql.FieldSet)
+	for i, field := range fields {
+		switch field.Name {
+		case "__typename":
+			out.Values[i] = graphql.MarshalString("AudioCodecAgg")
+		case "value":
+			out.Values[i] = ec._AudioCodecAgg_value(ctx, field, obj)
+		case "label":
+			out.Values[i] = ec._AudioCodecAgg_label(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "count":
+			out.Values[i] = ec._AudioCodecAgg_count(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		case "isEstimate":
+			out.Values[i] = ec._AudioCodecAgg_isEstimate(ctx, field, obj)
+			if out.Values[i] == graphql.Null {
+				out.Invalids++
+			}
+		default:
+			panic("unknown field " + strconv.Quote(field.Name))
+		}
+	}
+	out.Dispatch(ctx)
+	if out.Invalids > 0 {
+		return graphql.Null
+	}
+
+	atomic.AddInt32(&ec.deferred, int32(len(deferred)))
+
+	for label, dfs := range deferred {
+		ec.processDeferredGroup(graphql.DeferredGroup{
+			Label:    label,
+			Path:     graphql.GetPath(ctx),
+			FieldSet: dfs,
+			Context:  ctx,
+		})
+	}
+
+	return out
+}
 
 var contentImplementors = []string{"Content"}
 
@@ -18931,6 +19365,8 @@ func (ec *executionContext) _TorrentContent(ctx context.Context, sel ast.Selecti
 			out.Values[i] = ec._TorrentContent_video3d(ctx, field, obj)
 		case "videoModifier":
 			out.Values[i] = ec._TorrentContent_videoModifier(ctx, field, obj)
+		case "audioCodec":
+			out.Values[i] = ec._TorrentContent_audioCodec(ctx, field, obj)
 		case "releaseGroup":
 			out.Values[i] = ec._TorrentContent_releaseGroup(ctx, field, obj)
 		case "seeders":
@@ -19004,6 +19440,8 @@ func (ec *executionContext) _TorrentContentAggregations(ctx context.Context, sel
 			out.Values[i] = ec._TorrentContentAggregations_videoResolution(ctx, field, obj)
 		case "videoSource":
 			out.Values[i] = ec._TorrentContentAggregations_videoSource(ctx, field, obj)
+		case "audioCodec":
+			out.Values[i] = ec._TorrentContentAggregations_audioCodec(ctx, field, obj)
 		default:
 			panic("unknown field " + strconv.Quote(field.Name))
 		}
@@ -20630,6 +21068,10 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
+func (ec *executionContext) marshalNAudioCodecAgg2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐAudioCodecAgg(ctx context.Context, sel ast.SelectionSet, v gen.AudioCodecAgg) graphql.Marshaler {
+	return ec._AudioCodecAgg(ctx, sel, &v)
+}
+
 func (ec *executionContext) unmarshalNBoolean2bool(ctx context.Context, v any) (bool, error) {
 	res, err := graphql.UnmarshalBoolean(v)
 	return res, graphql.ErrorOnPath(ctx, err)
@@ -22033,6 +22475,149 @@ func (ec *executionContext) marshalN__TypeKind2string(ctx context.Context, sel a
 		}
 	}
 	return res
+}
+
+func (ec *executionContext) unmarshalOAudioCodec2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐNullAudioCodec(ctx context.Context, v any) (model.NullAudioCodec, error) {
+	var res model.NullAudioCodec
+	err := res.UnmarshalGQL(v)
+	return res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAudioCodec2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐNullAudioCodec(ctx context.Context, sel ast.SelectionSet, v model.NullAudioCodec) graphql.Marshaler {
+	return v
+}
+
+func (ec *executionContext) unmarshalOAudioCodec2ᚕᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx context.Context, v any) ([]*model.AudioCodec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	var vSlice []any
+	if v != nil {
+		vSlice = graphql.CoerceList(v)
+	}
+	var err error
+	res := make([]*model.AudioCodec, len(vSlice))
+	for i := range vSlice {
+		ctx := graphql.WithPathContext(ctx, graphql.NewPathWithIndex(i))
+		res[i], err = ec.unmarshalOAudioCodec2ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx, vSlice[i])
+		if err != nil {
+			return nil, err
+		}
+	}
+	return res, nil
+}
+
+func (ec *executionContext) marshalOAudioCodec2ᚕᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx context.Context, sel ast.SelectionSet, v []*model.AudioCodec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalOAudioCodec2ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOAudioCodec2ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx context.Context, v any) (*model.AudioCodec, error) {
+	if v == nil {
+		return nil, nil
+	}
+	tmp, err := graphql.UnmarshalString(v)
+	res := model.AudioCodec(tmp)
+	return &res, graphql.ErrorOnPath(ctx, err)
+}
+
+func (ec *executionContext) marshalOAudioCodec2ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋmodelᚐAudioCodec(ctx context.Context, sel ast.SelectionSet, v *model.AudioCodec) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	res := graphql.MarshalString(string(*v))
+	return res
+}
+
+func (ec *executionContext) marshalOAudioCodecAgg2ᚕgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐAudioCodecAggᚄ(ctx context.Context, sel ast.SelectionSet, v []gen.AudioCodecAgg) graphql.Marshaler {
+	if v == nil {
+		return graphql.Null
+	}
+	ret := make(graphql.Array, len(v))
+	var wg sync.WaitGroup
+	isLen1 := len(v) == 1
+	if !isLen1 {
+		wg.Add(len(v))
+	}
+	for i := range v {
+		i := i
+		fc := &graphql.FieldContext{
+			Index:  &i,
+			Result: &v[i],
+		}
+		ctx := graphql.WithFieldContext(ctx, fc)
+		f := func(i int) {
+			defer func() {
+				if r := recover(); r != nil {
+					ec.Error(ctx, ec.Recover(ctx, r))
+					ret = nil
+				}
+			}()
+			if !isLen1 {
+				defer wg.Done()
+			}
+			ret[i] = ec.marshalNAudioCodecAgg2githubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐAudioCodecAgg(ctx, sel, v[i])
+		}
+		if isLen1 {
+			f(i)
+		} else {
+			go f(i)
+		}
+
+	}
+	wg.Wait()
+
+	for _, e := range ret {
+		if e == graphql.Null {
+			return graphql.Null
+		}
+	}
+
+	return ret
+}
+
+func (ec *executionContext) unmarshalOAudioCodecFacetInput2ᚖgithubᚗcomᚋbitmagnetᚑioᚋbitmagnetᚋinternalᚋgqlᚋgqlmodelᚋgenᚐAudioCodecFacetInput(ctx context.Context, v any) (*gen.AudioCodecFacetInput, error) {
+	if v == nil {
+		return nil, nil
+	}
+	res, err := ec.unmarshalInputAudioCodecFacetInput(ctx, v)
+	return &res, graphql.ErrorOnPath(ctx, err)
 }
 
 func (ec *executionContext) unmarshalOBoolean2bool(ctx context.Context, v any) (bool, error) {

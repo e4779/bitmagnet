@@ -64,6 +64,11 @@ input VideoSourceFacetInput {
   filter: [VideoSource]
 }
 
+input AudioCodecFacetInput {
+  aggregate: Boolean
+  filter: [AudioCodec]
+}
+
 input TorrentContentFacetsInput {
   contentType: ContentTypeFacetInput
   torrentSource: TorrentSourceFacetInput
@@ -74,6 +79,7 @@ input TorrentContentFacetsInput {
   releaseYear: ReleaseYearFacetInput
   videoResolution: VideoResolutionFacetInput
   videoSource: VideoSourceFacetInput
+  audioCodec: AudioCodecFacetInput
 }
 
 type ContentTypeAgg {
@@ -139,6 +145,13 @@ type VideoSourceAgg {
   isEstimate: Boolean!
 }
 
+type AudioCodecAgg {
+  value: AudioCodec
+  label: String!
+  count: Int!
+  isEstimate: Boolean!
+}
+
 type TorrentContentAggregations {
   contentType: [ContentTypeAgg!]
   torrentSource: [TorrentSourceAgg!]
@@ -149,6 +162,7 @@ type TorrentContentAggregations {
   releaseYear: [ReleaseYearAgg!]
   videoResolution: [VideoResolutionAgg!]
   videoSource: [VideoSourceAgg!]
+  audioCodec: [AudioCodecAgg!]
 }
 
 type TorrentContentSearchResult {

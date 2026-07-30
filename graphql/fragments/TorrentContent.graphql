@@ -28,6 +28,7 @@ fragment TorrentContent on TorrentContent {
   videoModifier
   videoResolution
   videoSource
+  audioCodec
   seeders
   leechers
   publishedAt

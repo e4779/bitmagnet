@@ -15,6 +15,18 @@ import (
 	"github.com/bitmagnet-io/bitmagnet/internal/protocol"
 )
 
+type AudioCodecAgg struct {
+	Value      *model.AudioCodec `json:"value,omitempty"`
+	Label      string            `json:"label"`
+	Count      int               `json:"count"`
+	IsEstimate bool              `json:"isEstimate"`
+}
+
+type AudioCodecFacetInput struct {
+	Aggregate graphql.Omittable[*bool]               `json:"aggregate,omitempty"`
+	Filter    graphql.Omittable[[]*model.AudioCodec] `json:"filter,omitempty"`
+}
+
 type ContentTypeAgg struct {
 	Value      *model.ContentType `json:"value,omitempty"`
 	Label      string             `json:"label"`
@@ -146,6 +158,7 @@ type TorrentContentAggregations struct {
 	ReleaseYear     []ReleaseYearAgg     `json:"releaseYear,omitempty"`
 	VideoResolution []VideoResolutionAgg `json:"videoResolution,omitempty"`
 	VideoSource     []VideoSourceAgg     `json:"videoSource,omitempty"`
+	AudioCodec      []AudioCodecAgg      `json:"audioCodec,omitempty"`
 }
 
 type TorrentContentFacetsInput struct {
@@ -158,6 +171,7 @@ type TorrentContentFacetsInput struct {
 	ReleaseYear     graphql.Omittable[*ReleaseYearFacetInput]     `json:"releaseYear,omitempty"`
 	VideoResolution graphql.Omittable[*VideoResolutionFacetInput] `json:"videoResolution,omitempty"`
 	VideoSource     graphql.Omittable[*VideoSourceFacetInput]     `json:"videoSource,omitempty"`
+	AudioCodec      graphql.Omittable[*AudioCodecFacetInput]      `json:"audioCodec,omitempty"`
 }
 
 type TorrentContentOrderByInput struct {

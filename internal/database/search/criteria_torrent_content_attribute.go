@@ -14,14 +14,8 @@ var VideoResolutionCriteria = torrentContentAttributeCriteria[model.VideoResolut
 
 var Video3DCriteria = torrentContentAttributeCriteria[model.Video3D](video3dField)
 
-// audioCodecField returns the DAO field for torrent_contents.audio_codec.
-// Defined here (not in a facet file) because the GraphQL/facet layer for
-// AudioCodec is not yet implemented — but the SQL filter is needed by the
-// torznab adapter (cat=3010/3040 filtering).
-func audioCodecField(q *dao.Query) field.Field {
-	return q.TorrentContent.AudioCodec
-}
-
+// AudioCodecCriteria filters by the audio_codec column. audioCodecField is
+// defined in facet_torrent_content_audio_codec.go (shared with the facet).
 var AudioCodecCriteria = torrentContentAttributeCriteria[model.AudioCodec](audioCodecField)
 
 func torrentContentAttributeCriteria[T attribute](getFld func(*dao.Query) field.Field) func(...T) query.Criteria {

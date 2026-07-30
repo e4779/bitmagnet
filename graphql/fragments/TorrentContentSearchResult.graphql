@@ -62,5 +62,11 @@ fragment TorrentContentSearchResult on TorrentContentSearchResult {
       count
       isEstimate
     }
+    audioCodec {
+      value
+      label
+      count
+      isEstimate
+    }
   }
 }

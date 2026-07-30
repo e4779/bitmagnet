@@ -104,6 +104,12 @@ enum Video3D {
   V3DOU
 }
 
+enum AudioCodec {
+  Lossless
+  Lossy
+  Other
+}
+
 enum VideoCodec {
   H264
   x264
