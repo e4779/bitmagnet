@@ -43,6 +43,7 @@ func newTorrentHint(db *gorm.DB, opts ...gen.DOOption) torrentHint {
 	_torrentHint.ReleaseGroup = field.NewField(tableName, "release_group")
 	_torrentHint.CreatedAt = field.NewTime(tableName, "created_at")
 	_torrentHint.UpdatedAt = field.NewTime(tableName, "updated_at")
+	_torrentHint.AudioCodec = field.NewField(tableName, "audio_codec")
 
 	_torrentHint.fillFieldMap()
 
@@ -69,6 +70,7 @@ type torrentHint struct {
 	ReleaseGroup    field.Field
 	CreatedAt       field.Time
 	UpdatedAt       field.Time
+	AudioCodec      field.Field
 
 	fieldMap map[string]field.Expr
 }
@@ -101,6 +103,7 @@ func (t *torrentHint) updateTableName(table string) *torrentHint {
 	t.ReleaseGroup = field.NewField(table, "release_group")
 	t.CreatedAt = field.NewTime(table, "created_at")
 	t.UpdatedAt = field.NewTime(table, "updated_at")
+	t.AudioCodec = field.NewField(table, "audio_codec")
 
 	t.fillFieldMap()
 
@@ -117,7 +120,7 @@ func (t *torrentHint) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (t *torrentHint) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 16)
+	t.fieldMap = make(map[string]field.Expr, 17)
 	t.fieldMap["info_hash"] = t.InfoHash
 	t.fieldMap["content_type"] = t.ContentType
 	t.fieldMap["content_source"] = t.ContentSource
@@ -134,6 +137,7 @@ func (t *torrentHint) fillFieldMap() {
 	t.fieldMap["release_group"] = t.ReleaseGroup
 	t.fieldMap["created_at"] = t.CreatedAt
 	t.fieldMap["updated_at"] = t.UpdatedAt
+	t.fieldMap["audio_codec"] = t.AudioCodec
 }
 
 func (t torrentHint) clone(db *gorm.DB) torrentHint {

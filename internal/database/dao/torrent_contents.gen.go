@@ -48,6 +48,7 @@ func newTorrentContent(db *gorm.DB, opts ...gen.DOOption) torrentContent {
 	_torrentContent.PublishedAt = field.NewTime(tableName, "published_at")
 	_torrentContent.Size = field.NewUint(tableName, "size")
 	_torrentContent.FilesCount = field.NewField(tableName, "files_count")
+	_torrentContent.AudioCodec = field.NewField(tableName, "audio_codec")
 	_torrentContent.Torrent = torrentContentBelongsToTorrent{
 		db: db.Session(&gorm.Session{}),
 
@@ -159,6 +160,7 @@ type torrentContent struct {
 	PublishedAt     field.Time
 	Size            field.Uint
 	FilesCount      field.Field
+	AudioCodec      field.Field
 	Torrent         torrentContentBelongsToTorrent
 
 	Content torrentContentBelongsToContent
@@ -199,6 +201,7 @@ func (t *torrentContent) updateTableName(table string) *torrentContent {
 	t.PublishedAt = field.NewTime(table, "published_at")
 	t.Size = field.NewUint(table, "size")
 	t.FilesCount = field.NewField(table, "files_count")
+	t.AudioCodec = field.NewField(table, "audio_codec")
 
 	t.fillFieldMap()
 
@@ -215,7 +218,7 @@ func (t *torrentContent) GetFieldByName(fieldName string) (field.OrderExpr, bool
 }
 
 func (t *torrentContent) fillFieldMap() {
-	t.fieldMap = make(map[string]field.Expr, 23)
+	t.fieldMap = make(map[string]field.Expr, 24)
 	t.fieldMap["id"] = t.ID
 	t.fieldMap["info_hash"] = t.InfoHash
 	t.fieldMap["content_type"] = t.ContentType
@@ -237,6 +240,7 @@ func (t *torrentContent) fillFieldMap() {
 	t.fieldMap["published_at"] = t.PublishedAt
 	t.fieldMap["size"] = t.Size
 	t.fieldMap["files_count"] = t.FilesCount
+	t.fieldMap["audio_codec"] = t.AudioCodec
 
 }
 

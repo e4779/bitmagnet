@@ -331,6 +331,7 @@ func BuildGenerator(db *gorm.DB) *gen.Generator {
 		gen.FieldType("video_codec", "NullVideoCodec"),
 		gen.FieldType("video_3d", "NullVideo3D"),
 		gen.FieldType("video_modifier", "NullVideoModifier"),
+		gen.FieldType("audio_codec", "NullAudioCodec"),
 		gen.FieldType("tsv", "fts.Tsvector"),
 		createdAtReadOnly,
 	}

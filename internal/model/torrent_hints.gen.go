@@ -30,6 +30,7 @@ type TorrentHint struct {
 	ReleaseGroup    NullString          `gorm:"column:release_group" json:"releaseGroup"`
 	CreatedAt       time.Time           `gorm:"column:created_at;not null;<-:create" json:"createdAt"`
 	UpdatedAt       time.Time           `gorm:"column:updated_at;not null" json:"updatedAt"`
+	AudioCodec      NullAudioCodec      `gorm:"column:audio_codec" json:"audioCodec"`
 }
 
 // TableName TorrentHint's table name
