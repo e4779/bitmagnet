@@ -36,6 +36,7 @@ type Item struct {
 	VideoCodec      model.NullVideoCodec
 	Video3D         model.NullVideo3D
 	VideoModifier   model.NullVideoModifier
+	AudioCodec      model.NullAudioCodec
 	ReleaseGroup    model.NullString
 	PublishedAt     time.Time
 }
@@ -287,6 +288,7 @@ func createTorrentModel(info Info, item Item) model.Torrent {
 			VideoCodec:      item.VideoCodec,
 			Video3D:         item.Video3D,
 			VideoModifier:   item.VideoModifier,
+			AudioCodec:      item.AudioCodec,
 			ReleaseGroup:    item.ReleaseGroup,
 		}
 	}
