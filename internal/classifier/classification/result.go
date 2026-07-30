@@ -40,6 +40,7 @@ type ContentAttributes struct {
 	VideoCodec      model.NullVideoCodec
 	Video3D         model.NullVideo3D
 	VideoModifier   model.NullVideoModifier
+	AudioCodec      model.NullAudioCodec
 	ReleaseGroup    model.NullString
 }
 
@@ -85,6 +86,10 @@ func (a *ContentAttributes) Merge(other ContentAttributes) {
 		a.VideoModifier = other.VideoModifier
 	}
 
+	if !a.AudioCodec.Valid {
+		a.AudioCodec = other.AudioCodec
+	}
+
 	if !a.ReleaseGroup.Valid {
 		a.ReleaseGroup = other.ReleaseGroup
 	}
@@ -119,6 +124,10 @@ func (a *ContentAttributes) ApplyHint(h model.TorrentHint) {
 		a.VideoModifier = h.VideoModifier
 	}
 
+	if h.AudioCodec.Valid {
+		a.AudioCodec = h.AudioCodec
+	}
+
 	if h.ReleaseGroup.Valid {
 		a.ReleaseGroup = h.ReleaseGroup
 	}
@@ -130,4 +139,13 @@ func (a *ContentAttributes) InferVideoAttributes(input string) {
 	a.VideoCodec, a.ReleaseGroup = model.InferVideoCodecAndReleaseGroup(input)
 	a.Video3D = model.InferVideo3D(input)
 	a.VideoModifier = model.InferVideoModifier(input)
+}
+
+// InferAudioAttributes determines the audio codec from the torrent's files.
+// Unlike video attributes (inferred from the name via regex), audio codec is
+// inferred from the dominant audio file extension by size — because music is
+// almost always multi-file (album folders), so the torrent name rarely
+// carries the format.
+func (a *ContentAttributes) InferAudioAttributes(files []model.TorrentFile) {
+	a.AudioCodec = model.InferAudioCodecFromFiles(files)
 }

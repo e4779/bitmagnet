@@ -87,6 +87,15 @@ workflows:
             # parse video-related attributes from the torrent name;
             # if the content type wasn't previously specified and the name format doesn't suggest a movie or TV show, a "no match" will be returned:
             - parse_video_content
+    # parse audio-related attributes for music torrents:
+    - if_else:
+        condition: "result.contentType == contentType.music"
+        if_action:
+          find_match:
+            # parse audio codec (lossless/lossy/other) from file extensions;
+            # music is multi-file (albums), so the format lives in track
+            # extensions, not the folder name:
+            - parse_audio_content
     # if content isn't already attached, and a base title has been parsed, then search for the content, either from the local `content` table or an API integration:
     - if_else:
         condition: "!result.hasAttachedContent && result.hasBaseTitle"
